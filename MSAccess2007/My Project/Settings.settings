@@ -1,0 +1,21 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="My" GeneratedClassName="MySettings" UseMySettingsClassName="true">
+  <Profiles />
+  <Settings>
+    <Setting Name="MyPass" Type="System.String" Scope="User">
+      <Value Profile="(Default)">evry1falls</Value>
+    </Setting>
+    <Setting Name="ApiKey" Type="System.String" Scope="User">
+      <Value Profile="(Default)">n89b0u1pfczw6vj</Value>
+    </Setting>
+    <Setting Name="LoopBackHost" Type="System.String" Scope="User">
+      <Value Profile="(Default)">http://localhost:52499/</Value>
+    </Setting>
+    <Setting Name="AccessToken" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+    <Setting Name="Uid" Type="System.String" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
+  </Settings>
+</SettingsFile>
