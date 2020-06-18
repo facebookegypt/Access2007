@@ -9,9 +9,8 @@ Public Class CrystalForm
     Dim crConnectionInfo As New ConnectionInfo
     Dim CrTables As Tables
     Dim CrTable As Table
-    Private Sub CrystlalForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
-        Dim CMDSelect As String = ("SELECT * FROM BasicInfo LEFT JOIN MaritalStatus ON MaritalStatus.MStatusID = BasicInfo.MStatusID " &
-                "ORDER BY BasicInfo.UserID ASC")
+    Private Sub CrystalForm_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        Dim CMDSelect As String = ("SELECT * FROM InfoReport")
         Try
             Using DT As New DataTable
                 Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
@@ -20,13 +19,54 @@ Public Class CrystalForm
                         DataAdapt.Fill(DT)
                     End Using
                 End Using
-                cryRpt.Load(Application.StartupPath & "\MyInfo.rpt")
+                cryRpt.Load(IO.Path.Combine(Application.StartupPath, "MyInfo.rpt"))
                 AssignConnection(cryRpt)
                 cryRpt.SetDataSource(DT)
                 CrystalReportViewer1.ReportSource = cryRpt
             End Using
         Catch ex As EngineException
             MsgBox("Report Load Error : " & ex.Message)
+        End Try
+    End Sub
+    Private Sub CrystalReportViewer1_Load(sender As Object, e As EventArgs) Handles CrystalReportViewer1.Load
+        Try
+            Dim DropCMD As String = ("DROP VIEW InfoReport")
+            Dim CreateCmd As String =
+                ("CREATE VIEW InfoReport AS SELECT BasicInfo.UserID, BasicInfo.UserName, BasicInfo.UserAddrs, " &
+                "BasicInfo.UserChildrn, BasicInfo.UserBdate, BasicInfo.UserImg, MaritalStatus.Mname " &
+                "FROM BasicInfo LEFT JOIN MaritalStatus ON BasicInfo.MStatusID = MaritalStatus.MStatusID;")
+            Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
+                CN.Open()
+                'Drop View
+                Using CmdDrop As New OleDbCommand With
+                    {.Connection = CN,
+                    .CommandType = CommandType.Text,
+                    .CommandText = DropCMD}
+                    CmdDrop.ExecuteNonQuery()
+                End Using
+                'Create View
+                Using CmdCreate As New OleDbCommand With
+                    {.Connection = CN,
+                    .CommandType = CommandType.Text,
+                    .CommandText = CreateCmd}
+                    CmdCreate.ExecuteNonQuery()
+                End Using
+            End Using
+        Catch ex As OleDbException
+            Dim CreateCmd As String =
+                ("CREATE VIEW InfoReport AS SELECT BasicInfo.UserID, BasicInfo.UserName, BasicInfo.UserAddrs, " &
+                "BasicInfo.UserChildrn, BasicInfo.UserBdate, BasicInfo.UserImg, MaritalStatus.Mname " &
+                "FROM BasicInfo LEFT JOIN MaritalStatus ON BasicInfo.MStatusID = MaritalStatus.MStatusID;")
+            Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
+                CN.Open()
+                'Create View
+                Using CmdCreate As New OleDbCommand With
+                {.Connection = CN,
+                .CommandType = CommandType.Text,
+                .CommandText = CreateCmd}
+                    CmdCreate.ExecuteNonQuery()
+                End Using
+            End Using
         End Try
     End Sub
     Private Sub AssignConnection(rpt As ReportDocument)
