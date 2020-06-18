@@ -63,10 +63,22 @@
     <ApplicationIcon>bin\Debug\Icons\Office_Access_2007_Icon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="CrystalDecisions.CrystalReports.Engine, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
-    <Reference Include="CrystalDecisions.ReportSource, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
-    <Reference Include="CrystalDecisions.Shared, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
-    <Reference Include="CrystalDecisions.Windows.Forms, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL" />
+    <Reference Include="CrystalDecisions.CrystalReports.Engine, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.ReportSource, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304">
+      <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.Shared, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304">
+      <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
+    <Reference Include="CrystalDecisions.Windows.Forms, Version=13.0.2000.0, Culture=neutral, PublicKeyToken=692fbea5521e1304, processorArchitecture=MSIL">
+      <Private>False</Private>
+      <EmbedInteropTypes>False</EmbedInteropTypes>
+    </Reference>
     <Reference Include="Dropbox.Api, Version=4.0.0.0, Culture=neutral, PublicKeyToken=310f0e82fbb45d01, processorArchitecture=MSIL">
       <HintPath>..\packages\Dropbox.Api.4.10.0\lib\net45\Dropbox.Api.dll</HintPath>
       <Private>True</Private>
@@ -115,9 +127,9 @@
     </Compile>
     <Compile Include="connection.vb" />
     <Compile Include="CrystlalForm.Designer.vb">
-      <DependentUpon>CrystlalForm.vb</DependentUpon>
+      <DependentUpon>CrystalForm.vb</DependentUpon>
     </Compile>
-    <Compile Include="CrystlalForm.vb">
+    <Compile Include="CrystalForm.vb">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Drobbox.vb" />
@@ -149,8 +161,8 @@
       <Generator>CrystalDecisions.VSDesigner.CodeGen.ReportCodeGenerator</Generator>
       <LastGenOutput>MyInfo.vb</LastGenOutput>
     </EmbeddedResource>
-    <EmbeddedResource Include="CrystlalForm.resx">
-      <DependentUpon>CrystlalForm.vb</DependentUpon>
+    <EmbeddedResource Include="CrystalForm.resx">
+      <DependentUpon>CrystalForm.vb</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
@@ -172,7 +184,9 @@
       <CustomToolNamespace>My</CustomToolNamespace>
       <LastGenOutput>Settings.Designer.vb</LastGenOutput>
     </None>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="bin\Debug\Icons\Office_Access_2007_Icon.ico" />
@@ -225,6 +239,9 @@
     <Service Include="{C0C07587-41A7-46C8-8FBD-3F9C8EBE2DDC}" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="bin\Debug\Icons\PlayBlue.png" />
+    <None Include="bin\Debug\Icons\PauseBlue.png" />
+    <None Include="bin\Debug\Icons\StopBlue.png" />
     <Content Include="bin\Debug\index.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />

@@ -1,5 +1,5 @@
 ﻿<Global.Microsoft.VisualBasic.CompilerServices.DesignerGenerated()> _
-Partial Class CrystlalForm
+Partial Class CrystalForm
     Inherits System.Windows.Forms.Form
 
     'Form overrides dispose to clean up the component list.
@@ -35,15 +35,16 @@ Partial Class CrystlalForm
         Me.CrystalReportViewer1.Name = "CrystalReportViewer1"
         Me.CrystalReportViewer1.Size = New System.Drawing.Size(878, 371)
         Me.CrystalReportViewer1.TabIndex = 0
+        Me.CrystalReportViewer1.ToolPanelView = CrystalDecisions.Windows.Forms.ToolPanelViewType.None
         '
-        'CrystlalForm
+        'CrystalForm
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
         Me.ClientSize = New System.Drawing.Size(878, 371)
         Me.Controls.Add(Me.CrystalReportViewer1)
         Me.KeyPreview = True
-        Me.Name = "CrystlalForm"
+        Me.Name = "CrystalForm"
         Me.Text = "My Information"
         Me.ResumeLayout(False)
 

@@ -1,8 +1,11 @@
 ﻿Imports Dropbox.Api
 Imports System.Net.Http
+Imports System.Threading
+
 Public Class Drobbox
     Private ReadOnly RedirectUri As Uri = New Uri(My.Settings.LoopBackHost & "authorize")
     Private ReadOnly JSRedirectUri As Uri = New Uri(My.Settings.LoopBackHost & "token")
+    Public cts As CancellationTokenSource
     Public Async Function Run() As Task(Of String)
         'Check for internet connection
         Dim Result As String = String.Empty
@@ -96,8 +99,11 @@ Public Class Drobbox
         Dim full = Await client.Users.GetCurrentAccountAsync
         Return full.Name.DisplayName
     End Function
-    Public Async Function ChunkUpload(ByVal ThisFilePath As String, Progress1 As ToolStripProgressBar,
+    Public Async Function ChunkUpload(ByVal ThisFilePath As String,
+                                      Progress1 As ToolStripProgressBar,
+                                      CT As CancellationToken,
                                       Optional folder As String = ("/Tests")) As Task
+        cts = New CancellationTokenSource
         Dim config = New DropboxClientConfig("MSAccess2007.vb")
         Dim client = New DropboxClient(My.Settings.AccessToken, config)
         Const chunkSize As Integer = 1024 * 1024
@@ -108,27 +114,32 @@ Public Class Drobbox
         fs.Read(data, 0, data.Length)
         fs.Close()
         Try
+            Await Task.Delay(250)
             Using thisstream = New IO.MemoryStream(data)
                 Dim numChunks As Integer = CType(Math.Ceiling((CType(thisstream.Length, Double) / chunkSize)), Integer)
                 Dim buffer() As Byte = New Byte((chunkSize) - 1) {}
                 Dim sessionId As String = Nothing
                 Dim idx = 0
-                Do While idx < numChunks
+                Do While idx < numChunks And CT.IsCancellationRequested = False
                     Dim byteRead = thisstream.Read(buffer, 0, chunkSize)
                     Dim memStream As IO.MemoryStream = New IO.MemoryStream(buffer, 0, byteRead)
-                    If idx = 0 Then
+                    If idx = 0 And CT.IsCancellationRequested = False Then
                         Dim result = Await client.Files.UploadSessionStartAsync(body:=memStream)
                         sessionId = result.SessionId
+                        Debug.WriteLine("1) Session ID : " & sessionId)
                     Else
-                        Dim cursor As Files.UploadSessionCursor = New Files.UploadSessionCursor(sessionId, CType((chunkSize * idx), ULong))
-                        If idx = numChunks - 1 Then
+                        Dim cursor As Files.UploadSessionCursor = New Files.UploadSessionCursor(sessionId, chunkSize * idx)
+                        Debug.WriteLine("2) Uploaded : " & (idx * chunkSize))
+                        If idx = numChunks - 1 And CT.IsCancellationRequested = False Then
                             'Overwrite, if existed
                             Await client.Files.UploadSessionFinishAsync(cursor,
                                                                         New Files.CommitInfo(
                                                                         (folder + ("/" + ThisFilePath)),
                                                                         Files.WriteMode.Overwrite.Instance, False, Nothing, False), memStream)
+                            Debug.WriteLine("3) Uploaded : " & (idx * chunkSize))
                         Else
                             Await client.Files.UploadSessionAppendV2Async(cursor, body:=memStream)
+                            Debug.WriteLine("4) Uploaded : " & (idx * chunkSize))
                         End If
                     End If
                     idx += 1
@@ -145,4 +156,7 @@ Public Class Drobbox
             MsgBox(ex.Message)
         End Try
     End Function
+    Public Sub Reset()
+        cts = Nothing
+    End Sub
 End Class

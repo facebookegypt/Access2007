@@ -73,12 +73,29 @@ Module connection
     Public Function CheckForInternetConnection() As Boolean
         Try
             Using client = New Net.WebClient()
-                Using stream = client.OpenRead("http://www.google.com")
+                Using stream = client.OpenRead("https://www.google.com")
                     Return True
                 End Using
             End Using
-        Catch
+        Catch ex As Net.WebException
+            Debug.WriteLine(ex.Message)
             Return False
         End Try
     End Function
+    Public Sub CompactRepDB(ByVal src As String, ByVal Dest As String)
+        Dim Engine As Microsoft.Office.Interop.Access.Dao.DBEngine
+        Try
+            Engine = New Microsoft.Office.Interop.Access.Dao.DBEngine
+            Engine.CompactDatabase(
+                src,
+                Dest,
+                Microsoft.Office.Interop.Access.Dao.LanguageConstants.dbLangGeneral,
+                Microsoft.Office.Interop.Access.Dao.DatabaseTypeEnum.dbVersion150,
+                ";pwd=" & My.Settings.MyPass)
+        Catch ex As Exception
+            Debug.WriteLine("Error Compact : " & ex.Message)
+        Finally
+            Engine = Nothing
+        End Try
+    End Sub
 End Module

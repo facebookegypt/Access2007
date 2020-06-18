@@ -1,10 +1,15 @@
 ﻿Imports System.ComponentModel
 Imports System.Data.OleDb
+Imports System.Net.Http
+Imports System.Threading
+
 Public Class Form1
     Private UserSelectedID As Integer
     Private UserSelectedRow As Integer
-    Dim BGW_Reslt As String = ("SELECT * FROM BasicInfo LEFT JOIN MaritalStatus ON MaritalStatus.MStatusID = BasicInfo.MStatusID " &
-            "ORDER BY BasicInfo.UserID ASC;")
+    Private UserSelectedRows As Dictionary(Of Integer, Integer)
+    Private DelMulti As Boolean = False
+    Private BGW_Reslt As String = String.Empty
+    Dim cts As CancellationTokenSource
     Sub clearAllCntrls()
         For Each Ctrl As Control In BasicInfoGroupBox.Controls
             If TypeOf Ctrl Is TextBox Then
@@ -21,6 +26,11 @@ Public Class Form1
         UpdateToolStripMenuItem.Enabled = False
         DeleteToolStripMenuItem.Enabled = False
         SaveToolStripMenuItem.Enabled = True
+        'Populate DataGridView---------------------
+        If BackgroundWorker2.IsBusy Then
+            BackgroundWorker2.CancelAsync()
+        End If
+        BackgroundWorker2.RunWorkerAsync()
     End Sub
     Private Sub Form1_FormClosing(sender As Object, e As FormClosingEventArgs) Handles Me.FormClosing
         Dim AreYouSure As String =
@@ -45,6 +55,15 @@ Public Class Form1
             .AllowUserToAddRows = False
             .SelectionMode = DataGridViewSelectionMode.FullRowSelect
             .ReadOnly = True
+            .EnableHeadersVisualStyles = False
+            .MultiSelect = True
+            .AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill
+            With .ColumnHeadersDefaultCellStyle
+                .BackColor = Color.WhiteSmoke
+                .ForeColor = Color.Black
+                .Font = New Font(DisplayDGV.Font, FontStyle.Bold)
+                .Alignment = DataGridViewContentAlignment.MiddleCenter
+            End With
         End With
         'Textbox accepts only 0 to 9 children Integer
         ChildrenTextBox.MaxLength = 1
@@ -61,7 +80,7 @@ Public Class Form1
         If BackgroundWorker2.IsBusy Then
             BackgroundWorker2.CancelAsync()
         End If
-        BackgroundWorker2.RunWorkerAsync(BGW_Reslt)
+        BackgroundWorker2.RunWorkerAsync()
         '------------------------------------------
     End Sub
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
@@ -126,15 +145,8 @@ Public Class Form1
                         End Using
                         .AddWithValue("?", M_ID)
                     End With
-                    LblStatus.Text = (InsertCmd.ExecuteNonQuery().ToString & " Saved successfully.")
-                    'DataGridView------------------------
-                    If BackgroundWorker2.IsBusy Then
-                        BackgroundWorker2.CancelAsync()
-                    End If
-                    BackgroundWorker2.RunWorkerAsync()
-                    '------------------------------------
+                    LblStatus.Text = (InsertCmd.ExecuteNonQuery().ToString & " Saved successfully. " & DisplayDGV.RowCount & ") item(s).")
                     clearAllCntrls()
-                    UserSelectedRow = DisplayDGV.Rows.Count
                 Catch ex As OleDbException
                     Debug.WriteLine("Save Error : " & ex.Message)
                 End Try
@@ -204,12 +216,6 @@ Public Class Form1
                             .AddWithValue("?", UserSelectedID)
                         End With
                         LblStatus.Text = (UpdateCMD.ExecuteNonQuery().ToString & " Updated successfully.")
-                        'DataGridView---------------------
-                        If BackgroundWorker2.IsBusy Then
-                            BackgroundWorker2.CancelAsync()
-                        End If
-                        BackgroundWorker2.RunWorkerAsync()
-                        '---------------------------------
                         clearAllCntrls()
                     Catch ex As OleDbException
                         Debug.WriteLine("Update Error : " & ex.Message)
@@ -220,6 +226,7 @@ Public Class Form1
     End Sub
     Private Sub DisplayDGV_CellDoubleClick(sender As Object, e As DataGridViewCellEventArgs) Handles DisplayDGV.CellDoubleClick
         If e.ColumnIndex = -1 Or e.RowIndex = -1 Then Exit Sub
+        DelMulti = False
         Try
             UserSelectedID = DisplayDGV(0, e.RowIndex).Value.ToString
             FullNameTextBox.Text = DisplayDGV(1, e.RowIndex).Value.ToString
@@ -241,26 +248,28 @@ Public Class Form1
     End Sub
     Private Sub DeleteToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DeleteToolStripMenuItem.Click
         'Delete works only when DataGridView returns Data to Controls.
-        Dim AreYouSure As MsgBoxResult = MsgBox("Delete Data ?", MsgBoxStyle.YesNo + MsgBoxStyle.Information)
+        Dim AreYouSure As MsgBoxResult = MsgBox("Delete selected " & DisplayDGV.SelectedRows.Count & " row(s) ?",
+                                                MsgBoxStyle.YesNo + MsgBoxStyle.Information, "Delete")
         If AreYouSure = MsgBoxResult.No Then
             Exit Sub
         Else
             Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
+                CN.Open()
                 Dim SqlStr As String =
                             ("DELETE * FROM BasicInfo WHERE UserID=?")
-                CN.Open()
-                Using UpdateCMD As New OleDbCommand With {.Connection = CN, .CommandType = CommandType.Text, .CommandText = SqlStr}
+                Using DelCMD As New OleDbCommand With {.Connection = CN, .CommandType = CommandType.Text, .CommandText = SqlStr}
                     Try
-                        With UpdateCMD.Parameters
-                            .AddWithValue("?", UserSelectedID)
-                        End With
-                        LblStatus.Text = (UpdateCMD.ExecuteNonQuery().ToString & " Deleted successfully.")
-                        'DataGridView-------------------------
-                        If BackgroundWorker2.IsBusy Then
-                            BackgroundWorker2.CancelAsync()
-                        End If
-                        BackgroundWorker2.RunWorkerAsync()
-                        '-------------------------------------
+                        Dim I As Integer = 0
+                        For Each Irow As DataGridViewRow In DisplayDGV.SelectedRows
+                            UserSelectedID = Irow.Cells(0).Value
+                            With DelCMD.Parameters
+                                .Add("?", OleDbType.BigInt).Value = UserSelectedID
+                            End With
+                            DelCMD.ExecuteNonQuery()
+                            DelCMD.Parameters.Clear()
+                            I += 1
+                        Next
+                        LblStatus.Text = (I & " Deleted successfully. (" & DisplayDGV.RowCount & ") item(s).")
                         UserSelectedRow = 0
                         clearAllCntrls()
                     Catch ex As OleDbException
@@ -290,7 +299,6 @@ Public Class Form1
         Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
             Try
                 CN.Open()
-                LblStatus.Text = ("Database connected")
                 MaritalComboBox.Items.Clear()
                 MaritalComboBox.DataSource = Nothing
                 Dim SqlStr As String = ("SELECT * FROM MaritalStatus")
@@ -314,6 +322,7 @@ Public Class Form1
                     .SelectedIndex = -1
                     .EndUpdate()
                 End With
+                Label6.Text &= (" - " & M_ComboItems.Count.ToString)
             Catch ex As OleDbException
                 LblStatus.Text = ("Database Error")
                 Debug.WriteLine(ex.Message)
@@ -322,6 +331,10 @@ Public Class Form1
     End Sub
     Private Sub BackgroundWorker2_DoWork(sender As Object, e As DoWorkEventArgs) Handles BackgroundWorker2.DoWork
         e.Result = BGW_Reslt
+        If String.IsNullOrEmpty(e.Result) Then
+            e.Result = ("SELECT * FROM BasicInfo LEFT JOIN MaritalStatus ON MaritalStatus.MStatusID = BasicInfo.MStatusID " &
+            "ORDER BY BasicInfo.UserID ASC;")
+        End If
         Threading.Thread.Sleep(500)
     End Sub
     Private Sub BackgroundWorker2_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) Handles BackgroundWorker2.RunWorkerCompleted
@@ -330,7 +343,7 @@ Public Class Form1
                 CN.Open()
                 DisplayDGV.DataSource = Nothing
                 Using M_Cmd As New OleDbCommand With
-                    {.Connection = CN, .CommandType = CommandType.Text, .CommandText = BGW_Reslt}
+                    {.Connection = CN, .CommandType = CommandType.Text, .CommandText = e.Result}
                     Using M_Reader As OleDbDataReader = M_Cmd.ExecuteReader
                         If M_Reader.HasRows Then
                             Using MyTable As New DataTable
@@ -352,45 +365,68 @@ Public Class Form1
                                 End With
                             End Using
                         Else
-                            MsgBox("No search results.")
+                            MsgBox("No Data found.")
                         End If
                     End Using
                 End Using
-                DisplayDGV.Rows(UserSelectedRow).Selected = True
-                DisplayDGV.FirstDisplayedScrollingRowIndex = UserSelectedRow
+                If DisplayDGV.RowCount > 0 Then
+                    DisplayDGV.ClearSelection()
+                    DisplayDGV.Rows(UserSelectedRow).Selected = True
+                    DisplayDGV.FirstDisplayedScrollingRowIndex = UserSelectedRow
+                End If
+                LblStatus.Text = ("Database Connected. " & DisplayDGV.RowCount & " items.")
+                FullNameTextBox.Focus()
             Catch ex As OleDbException
                 Debug.WriteLine("Search Error : " & ex.Message)
+            Finally
+                BGW_Reslt = String.Empty
             End Try
         End Using
     End Sub
     Private Sub SAPCrystalReportsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles SAPCrystalReportsToolStripMenuItem.Click
-        Dim CrysFrm As New CrystlalForm
+        Dim CrysFrm As New CrystalForm
         CrysFrm.Show()
         Hide()
     End Sub
     Private Async Sub DropboxToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DropboxToolStripMenuItem.Click
+        'Compact Database
+        Dim NewBakFile As String = "ThisDB.accdb" & Now.Date.ToShortDateString
         'Uploads Backed up Database file (*.accdb) to DropBox Application Folder.
         'Install Dropbox from Nuget that suits your .Net version first.
         Dim DropThis As New Drobbox
-        Dim NewBakFile As String = "ThisDB.accdb" & Now.Date.ToShortDateString
+        DropLblUid.Text = Await DropThis.Run()
+        If Not DropLblUid.Text.StartsWith("OK") Then
+            DropLblUid.ForeColor = Color.Red
+            Exit Sub
+        End If
+        StopStrip.Visible = True
         Try
             If ToolStripProgressBar1.Value <> 100 Then
                 Try
-                    IO.File.Copy("ThisDB.accdb", NewBakFile, True)
+                    If IO.File.Exists(NewBakFile) Then IO.File.Delete(NewBakFile)
+                    CompactRepDB("ThisDB.accdb", NewBakFile)
                 Catch ex As IO.IOException
                     MsgBox("Error Copy : " & ex.Message)
                 End Try
                 ToolStripProgressBar1.Visible = True
                 BackupToolStripMenuItem.Enabled = False
-                DropLblUid.Text = Await DropThis.Run()
-                Await DropThis.ChunkUpload(NewBakFile, ToolStripProgressBar1)
+                cts = New CancellationTokenSource()
+                Await DropThis.ChunkUpload(NewBakFile, ToolStripProgressBar1, cts.Token)
+                If cts.IsCancellationRequested Then
+                    ToolStripProgressBar1.Value = 0
+                    ToolStripProgressBar1.Visible = False
+                    BackupToolStripMenuItem.Enabled = True 
+                    Exit Sub
+                End If
                 BackupToolStripMenuItem.Enabled = True
                 ToolStripProgressBar1.Visible = False
                 DropLblUid.Text = ("Uploaded successfully. (" & Now.ToString("hh:mm:ss tt") & ")")
                 Try
-                    IO.File.Delete(NewBakFile)
+                    IO.File.Delete("ThisDB.accdb")
                 Catch ex As IO.IOException
                     MsgBox("Delete Error : " & ex.Message)
+                Finally
+                    FileSystem.Rename(NewBakFile, "ThisDB.accdb")
                 End Try
             End If
         Catch ex As IO.IOException
@@ -398,5 +434,22 @@ Public Class Form1
         Finally
             DropboxToolStripMenuItem.Enabled = True
         End Try
+    End Sub
+    Private Sub StopStrip_Click(sender As Object, e As EventArgs) Handles StopStrip.Click
+        If cts IsNot Nothing Then
+            cts.Cancel()
+            DropLblUid.Text = ("Upload Cancelled at " & ToolStripProgressBar1.Value.ToString & "%")
+        End If
+    End Sub
+    Private Sub DisplayDGV_MouseClick(sender As Object, e As MouseEventArgs) Handles DisplayDGV.MouseClick
+        If My.Computer.Keyboard.CtrlKeyDown _
+            And e.Button = MouseButtons.Left And
+            DisplayDGV.SelectedRows.Count > 1 Then
+            'In case double click was fired before.
+            DelMulti = True
+        Else
+            DelMulti = False
+        End If
+        DeleteToolStripMenuItem.Enabled = DelMulti
     End Sub
 End Class

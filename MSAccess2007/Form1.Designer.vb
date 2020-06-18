@@ -46,6 +46,7 @@ Partial Class Form1
         Me.LblStatus = New System.Windows.Forms.ToolStripLabel()
         Me.DropLblUid = New System.Windows.Forms.ToolStripLabel()
         Me.ToolStripProgressBar1 = New System.Windows.Forms.ToolStripProgressBar()
+        Me.StopStrip = New System.Windows.Forms.ToolStripButton()
         Me.ChildrenTextBox = New System.Windows.Forms.TextBox()
         Me.FullNameTextBox = New System.Windows.Forms.TextBox()
         Me.Label1 = New System.Windows.Forms.Label()
@@ -71,12 +72,12 @@ Partial Class Form1
         '
         'DisplayDGV
         '
+        Me.DisplayDGV.AllowUserToDeleteRows = False
         Me.DisplayDGV.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
             Or System.Windows.Forms.AnchorStyles.Left) _
             Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
         Me.DisplayDGV.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
         Me.DisplayDGV.Location = New System.Drawing.Point(12, 228)
-        Me.DisplayDGV.MultiSelect = False
         Me.DisplayDGV.Name = "DisplayDGV"
         Me.DisplayDGV.Size = New System.Drawing.Size(874, 168)
         Me.DisplayDGV.TabIndex = 3
@@ -168,14 +169,14 @@ Partial Class Form1
         '
         Me.DropboxToolStripMenuItem.Image = Global.MSAccess2007.My.Resources.Resources.Dropbox175x175
         Me.DropboxToolStripMenuItem.Name = "DropboxToolStripMenuItem"
-        Me.DropboxToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.DropboxToolStripMenuItem.Size = New System.Drawing.Size(142, 22)
         Me.DropboxToolStripMenuItem.Text = "Dropbox"
         '
         'GoogleDriveToolStripMenuItem
         '
         Me.GoogleDriveToolStripMenuItem.Image = Global.MSAccess2007.My.Resources.Resources.Google_Drive_icon
         Me.GoogleDriveToolStripMenuItem.Name = "GoogleDriveToolStripMenuItem"
-        Me.GoogleDriveToolStripMenuItem.Size = New System.Drawing.Size(152, 22)
+        Me.GoogleDriveToolStripMenuItem.Size = New System.Drawing.Size(142, 22)
         Me.GoogleDriveToolStripMenuItem.Text = "Google Drive"
         '
         'ToolStripMenuItem2
@@ -205,7 +206,7 @@ Partial Class Form1
         'ToolStrip1
         '
         Me.ToolStrip1.Dock = System.Windows.Forms.DockStyle.Bottom
-        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DateLabel, Me.LblStatus, Me.DropLblUid, Me.ToolStripProgressBar1})
+        Me.ToolStrip1.Items.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DateLabel, Me.LblStatus, Me.DropLblUid, Me.ToolStripProgressBar1, Me.StopStrip})
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 399)
         Me.ToolStrip1.Name = "ToolStrip1"
         Me.ToolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System
@@ -236,6 +237,18 @@ Partial Class Form1
         Me.ToolStripProgressBar1.Name = "ToolStripProgressBar1"
         Me.ToolStripProgressBar1.Size = New System.Drawing.Size(100, 22)
         Me.ToolStripProgressBar1.Visible = False
+        '
+        'StopStrip
+        '
+        Me.StopStrip.BackColor = System.Drawing.Color.Transparent
+        Me.StopStrip.DisplayStyle = System.Windows.Forms.ToolStripItemDisplayStyle.Image
+        Me.StopStrip.Image = Global.MSAccess2007.My.Resources.Resources.StopBlue
+        Me.StopStrip.ImageScaling = System.Windows.Forms.ToolStripItemImageScaling.None
+        Me.StopStrip.ImageTransparentColor = System.Drawing.Color.Magenta
+        Me.StopStrip.Name = "StopStrip"
+        Me.StopStrip.Size = New System.Drawing.Size(23, 22)
+        Me.StopStrip.ToolTipText = "Stop"
+        Me.StopStrip.Visible = False
         '
         'ChildrenTextBox
         '
@@ -392,6 +405,7 @@ Partial Class Form1
         Me.Controls.Add(Me.ToolStrip1)
         Me.Controls.Add(Me.DisplayDGV)
         Me.Controls.Add(Me.MenuStrip1)
+        Me.DoubleBuffered = True
         Me.Icon = CType(resources.GetObject("$this.Icon"), System.Drawing.Icon)
         Me.KeyPreview = True
         Me.MainMenuStrip = Me.MenuStrip1
@@ -447,4 +461,5 @@ Partial Class Form1
     Friend WithEvents BackgroundWorker2 As System.ComponentModel.BackgroundWorker
     Friend WithEvents DropLblUid As ToolStripLabel
     Public WithEvents ToolStripProgressBar1 As ToolStripProgressBar
+    Friend WithEvents StopStrip As ToolStripButton
 End Class
