@@ -35,8 +35,6 @@ Partial Class Form1
         Me.DeleteToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem1 = New System.Windows.Forms.ToolStripSeparator()
         Me.BackupToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.DropboxToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
-        Me.GoogleDriveToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem2 = New System.Windows.Forms.ToolStripSeparator()
         Me.SAPCrystalReportsToolStripMenuItem = New System.Windows.Forms.ToolStripMenuItem()
         Me.ToolStripMenuItem3 = New System.Windows.Forms.ToolStripSeparator()
@@ -159,25 +157,11 @@ Partial Class Form1
         '
         'BackupToolStripMenuItem
         '
-        Me.BackupToolStripMenuItem.DropDownItems.AddRange(New System.Windows.Forms.ToolStripItem() {Me.DropboxToolStripMenuItem, Me.GoogleDriveToolStripMenuItem})
-        Me.BackupToolStripMenuItem.Image = Global.MSAccess2007.My.Resources.Resources.folder_wrench
+        Me.BackupToolStripMenuItem.BackColor = System.Drawing.Color.Transparent
+        Me.BackupToolStripMenuItem.Image = Global.MSAccess2007.My.Resources.Resources.Dropbox175x175
         Me.BackupToolStripMenuItem.Name = "BackupToolStripMenuItem"
         Me.BackupToolStripMenuItem.Size = New System.Drawing.Size(177, 22)
-        Me.BackupToolStripMenuItem.Text = "Backup"
-        '
-        'DropboxToolStripMenuItem
-        '
-        Me.DropboxToolStripMenuItem.Image = Global.MSAccess2007.My.Resources.Resources.Dropbox175x175
-        Me.DropboxToolStripMenuItem.Name = "DropboxToolStripMenuItem"
-        Me.DropboxToolStripMenuItem.Size = New System.Drawing.Size(142, 22)
-        Me.DropboxToolStripMenuItem.Text = "Dropbox"
-        '
-        'GoogleDriveToolStripMenuItem
-        '
-        Me.GoogleDriveToolStripMenuItem.Image = Global.MSAccess2007.My.Resources.Resources.Google_Drive_icon
-        Me.GoogleDriveToolStripMenuItem.Name = "GoogleDriveToolStripMenuItem"
-        Me.GoogleDriveToolStripMenuItem.Size = New System.Drawing.Size(142, 22)
-        Me.GoogleDriveToolStripMenuItem.Text = "Google Drive"
+        Me.BackupToolStripMenuItem.Text = "Backup to Dropbox"
         '
         'ToolStripMenuItem2
         '
@@ -455,8 +439,6 @@ Partial Class Form1
     Friend WithEvents Label6 As Label
     Friend WithEvents BackgroundWorker1 As System.ComponentModel.BackgroundWorker
     Friend WithEvents MaritalComboBox As ComboBox
-    Friend WithEvents DropboxToolStripMenuItem As ToolStripMenuItem
-    Friend WithEvents GoogleDriveToolStripMenuItem As ToolStripMenuItem
     Friend WithEvents LblStatus As ToolStripLabel
     Friend WithEvents BackgroundWorker2 As System.ComponentModel.BackgroundWorker
     Friend WithEvents DropLblUid As ToolStripLabel

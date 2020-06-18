@@ -126,20 +126,20 @@ Public Class Drobbox
                     If idx = 0 And CT.IsCancellationRequested = False Then
                         Dim result = Await client.Files.UploadSessionStartAsync(body:=memStream)
                         sessionId = result.SessionId
-                        Debug.WriteLine("1) Session ID : " & sessionId)
+                        'Debug.WriteLine("1) Session ID : " & sessionId)
                     Else
                         Dim cursor As Files.UploadSessionCursor = New Files.UploadSessionCursor(sessionId, chunkSize * idx)
-                        Debug.WriteLine("2) Uploaded : " & (idx * chunkSize))
+                        'Debug.WriteLine("2) Uploaded : " & (idx * chunkSize))
                         If idx = numChunks - 1 And CT.IsCancellationRequested = False Then
                             'Overwrite, if existed
                             Await client.Files.UploadSessionFinishAsync(cursor,
                                                                         New Files.CommitInfo(
                                                                         (folder + ("/" + ThisFilePath)),
                                                                         Files.WriteMode.Overwrite.Instance, False, Nothing, False), memStream)
-                            Debug.WriteLine("3) Uploaded : " & (idx * chunkSize))
+                            '   Debug.WriteLine("3) Uploaded : " & (idx * chunkSize))
                         Else
                             Await client.Files.UploadSessionAppendV2Async(cursor, body:=memStream)
-                            Debug.WriteLine("4) Uploaded : " & (idx * chunkSize))
+                            '  Debug.WriteLine("4) Uploaded : " & (idx * chunkSize))
                         End If
                     End If
                     idx += 1

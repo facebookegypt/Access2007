@@ -388,7 +388,25 @@ Public Class Form1
         CrysFrm.Show()
         Hide()
     End Sub
-    Private Async Sub DropboxToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DropboxToolStripMenuItem.Click
+    Private Sub StopStrip_Click(sender As Object, e As EventArgs) Handles StopStrip.Click
+        If cts IsNot Nothing Then
+            cts.Cancel()
+            DropLblUid.Text = ("Upload Cancelled at " & ToolStripProgressBar1.Value.ToString & "%")
+            StopStrip.Visible = False
+        End If
+    End Sub
+    Private Sub DisplayDGV_MouseClick(sender As Object, e As MouseEventArgs) Handles DisplayDGV.MouseClick
+        If My.Computer.Keyboard.CtrlKeyDown _
+            And e.Button = MouseButtons.Left And
+            DisplayDGV.SelectedRows.Count > 1 Then
+            'In case double click was fired before.
+            DelMulti = True
+        Else
+            DelMulti = False
+        End If
+        DeleteToolStripMenuItem.Enabled = DelMulti
+    End Sub
+    Private Async Sub BackupToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles BackupToolStripMenuItem.Click
         'Compact Database
         Dim NewBakFile As String = "ThisDB.accdb" & Now.Date.ToShortDateString
         'Uploads Backed up Database file (*.accdb) to DropBox Application Folder.
@@ -415,11 +433,12 @@ Public Class Form1
                 If cts.IsCancellationRequested Then
                     ToolStripProgressBar1.Value = 0
                     ToolStripProgressBar1.Visible = False
-                    BackupToolStripMenuItem.Enabled = True 
+                    BackupToolStripMenuItem.Enabled = True
                     Exit Sub
                 End If
                 BackupToolStripMenuItem.Enabled = True
                 ToolStripProgressBar1.Visible = False
+                StopStrip.Visible = False
                 DropLblUid.Text = ("Uploaded successfully. (" & Now.ToString("hh:mm:ss tt") & ")")
                 Try
                     IO.File.Delete("ThisDB.accdb")
@@ -432,24 +451,8 @@ Public Class Form1
         Catch ex As IO.IOException
             MsgBox(ex.Message)
         Finally
-            DropboxToolStripMenuItem.Enabled = True
+            BackupToolStripMenuItem.Enabled = True
+            StopStrip.Enabled = True
         End Try
-    End Sub
-    Private Sub StopStrip_Click(sender As Object, e As EventArgs) Handles StopStrip.Click
-        If cts IsNot Nothing Then
-            cts.Cancel()
-            DropLblUid.Text = ("Upload Cancelled at " & ToolStripProgressBar1.Value.ToString & "%")
-        End If
-    End Sub
-    Private Sub DisplayDGV_MouseClick(sender As Object, e As MouseEventArgs) Handles DisplayDGV.MouseClick
-        If My.Computer.Keyboard.CtrlKeyDown _
-            And e.Button = MouseButtons.Left And
-            DisplayDGV.SelectedRows.Count > 1 Then
-            'In case double click was fired before.
-            DelMulti = True
-        Else
-            DelMulti = False
-        End If
-        DeleteToolStripMenuItem.Enabled = DelMulti
     End Sub
 End Class
