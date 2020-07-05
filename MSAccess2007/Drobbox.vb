@@ -1,6 +1,8 @@
 ﻿Imports Dropbox.Api
+Imports Dropbox.Api.DropboxClient
 Imports System.Net.Http
 Imports System.Threading
+Imports Dropbox.Api.Files
 
 Public Class Drobbox
     Private ReadOnly RedirectUri As Uri = New Uri(My.Settings.LoopBackHost & "authorize")
@@ -26,8 +28,8 @@ Public Class Drobbox
         Dim httpClient = New HttpClient(New WebRequestHandler() With {.ReadWriteTimeout = 10 * 1000})
         Try
             Dim config = New DropboxClientConfig("MSAccess2007.vb")
-            Dim client = New DropboxClient(accessToken, config)
-            Result = ("OK : ") & Await GetCurrentAccount(client)
+            Dim Client = New DropboxClient(accessToken, config)
+            Result = ("OK : ") & Await GetCurrentAccount(Client)
         Catch e As HttpException
             Debug.WriteLine("Exception reported from RPC layer")
             Debug.WriteLine("    Status code: {0}", e.StatusCode)
@@ -110,7 +112,7 @@ Public Class Drobbox
         Dim LocalFileName As String = ThisFilePath.Remove(0, ThisFilePath.LastIndexOf("\") + 1)
         '       chunkSize = 8192 * 1024 '8mb
         Dim fs As IO.FileStream = New IO.FileStream(ThisFilePath, IO.FileMode.Open)
-        Dim data As Byte() = New Byte(fs.Length) {}
+        Dim data As Byte() = New Byte(CInt(fs.Length)) {}
         fs.Read(data, 0, data.Length)
         fs.Close()
         Try
@@ -128,14 +130,13 @@ Public Class Drobbox
                         sessionId = result.SessionId
                         'Debug.WriteLine("1) Session ID : " & sessionId)
                     Else
-                        Dim cursor As Files.UploadSessionCursor = New Files.UploadSessionCursor(sessionId, chunkSize * idx)
+                        Dim cursor As Files.UploadSessionCursor = New Files.UploadSessionCursor(sessionId, CULng(chunkSize * idx))
                         'Debug.WriteLine("2) Uploaded : " & (idx * chunkSize))
                         If idx = numChunks - 1 And CT.IsCancellationRequested = False Then
                             'Overwrite, if existed
                             Await client.Files.UploadSessionFinishAsync(cursor,
                                                                         New Files.CommitInfo(
-                                                                        (folder + ("/" + ThisFilePath)),
-                                                                        Files.WriteMode.Overwrite.Instance, False, Nothing, False), memStream)
+                                                                        (folder + ("/" + ThisFilePath)), WriteMode.Overwrite.Instance, False, Nothing, False), memStream)
                             '   Debug.WriteLine("3) Uploaded : " & (idx * chunkSize))
                         Else
                             Await client.Files.UploadSessionAppendV2Async(cursor, body:=memStream)

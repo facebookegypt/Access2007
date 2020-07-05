@@ -3,11 +3,12 @@ Imports System.IO
 Imports System.Configuration
 Module connection
     Private MyDirectory As String = Application.StartupPath
+    Private DBPass As String = My.Settings.MyPass
     Function GetDataSource(Optional ThisDB As String = "ThisDB.accdb") As String
         'Valid Path + Microsoft Access Database file + extension
         Dim MyDataSource As String = String.Empty
-        If File.Exists(Path.Combine(MyDirectory, ThisDB)) Then
-            MyDataSource = Path.Combine(MyDirectory, ThisDB)
+        If File.Exists(ThisDB) Then
+            MyDataSource = (ThisDB)
         Else
             MyDataSource = CType(MsgBox("Database file doesn't exist.", MsgBoxStyle.Critical), String)
             End
@@ -32,10 +33,10 @@ Module connection
         Dim reader = OleDbEnumerator.GetRootEnumerator()
         Dim list = New List(Of String)
         While reader.Read()
-            For i = 0 To reader.FieldCount - 1
+            For I As Integer = 0 To reader.FieldCount - 1
                 'Debug.WriteLine(reader.GetName(i))
-                If reader.GetName(i) = "SOURCES_NAME" Then
-                    list.Add(reader.GetValue(i).ToString())
+                If reader.GetName(I) = "SOURCES_NAME" Then
+                    list.Add(reader.GetValue(I).ToString())
                     'Debug.WriteLine(reader.GetValue(i).ToString())
                 End If
             Next
@@ -50,16 +51,16 @@ Module connection
         Next
         Return Provider
     End Function
-    Function GetBuilderCNString()
+    Function GetBuilderCNString(Optional ThisDB As String = "ThisDB.accdb", Optional DBPass As String = "evry1falls") As String
         Dim ThisConnectionString As String = String.Empty
         Dim builder As New OleDbConnectionStringBuilder() With {
         .PersistSecurityInfo = False,
         .Provider = GetProvider(),
-        .DataSource = GetDataSource()
+        .DataSource = GetDataSource(ThisDB)
         }
         Try
             With builder
-                .Add("Jet OLEDB:Database Password", My.Settings.MyPass)
+                .Add("Jet OLEDB:Database Password", DBPass)
                 .Add("Jet OLEDB:Database Locking Mode", 1)
             End With
             ThisConnectionString = (builder.ConnectionString)

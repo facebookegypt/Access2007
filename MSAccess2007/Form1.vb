@@ -10,6 +10,7 @@ Public Class Form1
     Private DelMulti As Boolean = False
     Private BGW_Reslt As String = String.Empty
     Dim cts As CancellationTokenSource
+    Dim M_ComboItems As New Dictionary(Of Integer, String)
     Sub clearAllCntrls()
         For Each Ctrl As Control In BasicInfoGroupBox.Controls
             If TypeOf Ctrl Is TextBox Then
@@ -69,11 +70,14 @@ Public Class Form1
         ChildrenTextBox.MaxLength = 1
         AddHandler NewToolStripMenuItem.Click, AddressOf clearAllCntrls
         'Populate ComboBox-------------------------
-        BackgroundWorker1.WorkerSupportsCancellation = True
-        If BackgroundWorker1.IsBusy Then
-            BackgroundWorker1.CancelAsync()
-        End If
-        BackgroundWorker1.RunWorkerAsync()
+        With BackgroundWorker1
+            .WorkerSupportsCancellation = True
+            .WorkerReportsProgress = True
+            If .IsBusy Then
+                .CancelAsync()
+            End If
+            .RunWorkerAsync()
+        End With
         '--------------------------------------
         'Populate DataGridView---------------------
         BackgroundWorker2.WorkerSupportsCancellation = True
@@ -289,31 +293,44 @@ Public Class Form1
                 End If
             End If
         Catch ex As Exception
-            Debug.WriteLine("Error Display Image : " & ex.Message)
+            MsgBox("Error Display Image : " & ex.Message)
         End Try
     End Sub
     Private Sub BackgroundWorker1_DoWork(sender As Object, e As DoWorkEventArgs) Handles BackgroundWorker1.DoWork
-        Threading.Thread.Sleep(500)
+        Try
+            Dim SqlStr As String = ("SELECT * FROM MaritalStatus")
+            Dim SqlStr1 As String = ("SELECT COUNT(*) FROM MaritalStatus")
+            Dim Icount As Object
+            Dim Count As Integer
+            Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()},
+            M_Cmd As New OleDbCommand(SqlStr, CN), M1_Cmd As New OleDbCommand(SqlStr1, CN)
+                CN.Open()
+                Icount = M1_Cmd.ExecuteScalar
+                Count = Convert.ToInt32(Icount)
+                Using M_Reader As OleDbDataReader = M_Cmd.ExecuteReader
+                    If M_Reader.HasRows Then
+                        While M_Reader.Read
+                            M_ComboItems.Add(M_Reader!MStatusID, M_Reader!Mname)
+                            BackgroundWorker1.ReportProgress(Count - 1, "Items")
+                        End While
+                    End If
+                End Using
+            End Using
+        Catch ex As OleDbException
+            MsgBox(ex.Message)
+        End Try
+    End Sub
+    Private Sub BackgroundWorker1_ProgressChanged(sender As Object, e As ProgressChangedEventArgs) Handles BackgroundWorker1.ProgressChanged
+        Debug.WriteLine((String.Format _
+            ("{0} percent completed and {1} has been Loaded",
+             e.ProgressPercentage, e.UserState.ToString)))
     End Sub
     Private Sub BackgroundWorker1_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) Handles BackgroundWorker1.RunWorkerCompleted
         Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
             Try
-                CN.Open()
-                MaritalComboBox.Items.Clear()
-                MaritalComboBox.DataSource = Nothing
-                Dim SqlStr As String = ("SELECT * FROM MaritalStatus")
-                Dim M_ComboItems As New Dictionary(Of Integer, String)()
-                Using M_Cmd As New OleDbCommand With
-                    {.Connection = CN, .CommandType = CommandType.Text, .CommandText = SqlStr}
-                    Using M_Reader As OleDbDataReader = M_Cmd.ExecuteReader
-                        If M_Reader.HasRows Then
-                            While M_Reader.Read
-                                M_ComboItems.Add(M_Reader!MStatusID, M_Reader!Mname)
-                            End While
-                        End If
-                    End Using
-                End Using
                 With MaritalComboBox
+                    .Items.Clear()
+                    .DataSource = Nothing
                     .BeginUpdate()
                     .DataSource = New BindingSource(M_ComboItems, Nothing)
                     .DisplayMember = "Value"
@@ -338,36 +355,26 @@ Public Class Form1
         Threading.Thread.Sleep(500)
     End Sub
     Private Sub BackgroundWorker2_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) Handles BackgroundWorker2.RunWorkerCompleted
-        Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
+        Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()},
+            M_Cmd As New OleDbCommand(e.Result, CN)
             Try
                 CN.Open()
-                DisplayDGV.DataSource = Nothing
-                Using M_Cmd As New OleDbCommand With
-                    {.Connection = CN, .CommandType = CommandType.Text, .CommandText = e.Result}
-                    Using M_Reader As OleDbDataReader = M_Cmd.ExecuteReader
-                        If M_Reader.HasRows Then
-                            Using MyTable As New DataTable
-                                For I As Integer = 0 To MyTable.Rows.Count - 1
-                                    M_Reader.Read()
-                                Next
-                                MyTable.Load(M_Reader)
-                                DisplayDGV.DataSource = MyTable
-                                With DisplayDGV
-                                    .Columns(0).HeaderText = ("ID")
-                                    .Columns(1).HeaderText = ("Full Name")
-                                    .Columns(2).HeaderText = ("Full Address")
-                                    .Columns(3).HeaderText = ("Children")
-                                    .Columns(4).HeaderText = ("Birth Date")
-                                    .Columns(5).HeaderText = ("Image")
-                                    .Columns(6).Visible = False
-                                    .Columns(7).Visible = False
-                                    .Columns(8).HeaderText = ("Martial Status")
-                                End With
-                            End Using
-                        Else
-                            MsgBox("No Data found.")
-                        End If
+                Using MyTable As New DataTable
+                    Using MyReader As OleDbDataReader = M_Cmd.ExecuteReader
+                        MyTable.Load(MyReader)
                     End Using
+                    With DisplayDGV
+                        .DataSource = MyTable
+                        .Columns(0).HeaderText = ("ID")
+                        .Columns(1).HeaderText = ("Full Name")
+                        .Columns(2).HeaderText = ("Full Address")
+                        .Columns(3).HeaderText = ("Children")
+                        .Columns(4).HeaderText = ("Birth Date")
+                        .Columns(5).HeaderText = ("Image")
+                        .Columns(6).Visible = False
+                        .Columns(7).Visible = False
+                        .Columns(8).HeaderText = ("Martial Status")
+                    End With
                 End Using
                 If DisplayDGV.RowCount > 0 Then
                     DisplayDGV.ClearSelection()
@@ -454,5 +461,10 @@ Public Class Form1
             BackupToolStripMenuItem.Enabled = True
             StopStrip.Enabled = True
         End Try
+    End Sub
+    Private Sub DatabaseSettingsToolStripMenuItem_Click(sender As Object, e As EventArgs) Handles DatabaseSettingsToolStripMenuItem.Click
+        Dim DBSetting As New DBSettings
+        DBSetting.Show()
+        Hide()
     End Sub
 End Class

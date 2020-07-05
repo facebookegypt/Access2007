@@ -25,6 +25,8 @@
     <DocumentationFile>MSAccess2007.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -36,6 +38,8 @@
     <DocumentationFile>MSAccess2007.xml</DocumentationFile>
     <NoWarn>42016,41999,42017,42018,42019,42032,42036,42020,42021,42022</NoWarn>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
   </PropertyGroup>
   <PropertyGroup>
     <OptionExplicit>On</OptionExplicit>
@@ -53,11 +57,19 @@
     <PlatformTarget>AnyCPU</PlatformTarget>
     <OutputPath>bin\x86\Debug\</OutputPath>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'Release|x86'">
     <PlatformTarget>x86</PlatformTarget>
     <OutputPath>bin\x86\Release\</OutputPath>
     <Prefer32Bit>false</Prefer32Bit>
+    <WarningsAsErrors>
+    </WarningsAsErrors>
+    <NoWarn>
+    </NoWarn>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>bin\Debug\Icons\Office_Access_2007_Icon.ico</ApplicationIcon>
@@ -132,6 +144,13 @@
     <Compile Include="CrystalForm.vb">
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="DatabaseSettings.vb" />
+    <Compile Include="DBSettings.Designer.vb">
+      <DependentUpon>DBSettings.vb</DependentUpon>
+    </Compile>
+    <Compile Include="DBSettings.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Drobbox.vb" />
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
@@ -164,6 +183,9 @@
     <EmbeddedResource Include="CrystalForm.resx">
       <DependentUpon>CrystalForm.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="DBSettings.resx">
+      <DependentUpon>DBSettings.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
     </EmbeddedResource>
@@ -189,59 +211,90 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\Office_Access_2007_Icon.ico" />
+    <Content Include="bin\Debug\Icons\Office_Access_2007_Icon.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\Office_Access_2007_Icon_64.ico" />
+    <Content Include="bin\Debug\Icons\Office_Access_2007_Icon_64.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder new.ico" />
+    <Content Include="bin\Debug\Icons\folder new.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder_add.png" />
+    <Content Include="bin\Debug\Icons\folder_add.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder search.ico" />
+    <Content Include="bin\Debug\Icons\folder search.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder_edit.png" />
+    <Content Include="bin\Debug\Icons\folder_edit.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder_delete.png" />
+    <Content Include="bin\Debug\Icons\folder_delete.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder_wrench.png" />
+    <Content Include="bin\Debug\Icons\folder_wrench.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\folder_picture.png" />
+    <Content Include="bin\Debug\Icons\folder_picture.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\close-2.ico" />
+    <Content Include="bin\Debug\Icons\close-2.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <None Include="MyConn.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
-    <None Include="Resources\Dropbox175x175.png">
+    <Content Include="Resources\Dropbox175x175.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Resources\Google-Drive-icon.png">
+    <Content Include="Resources\Google-Drive-icon.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
+    </Content>
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\no-photo.png" />
+    <Content Include="bin\Debug\Icons\no-photo.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <Service Include="{C0C07587-41A7-46C8-8FBD-3F9C8EBE2DDC}" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="bin\Debug\Icons\PlayBlue.png" />
-    <None Include="bin\Debug\Icons\PauseBlue.png" />
-    <None Include="bin\Debug\Icons\StopBlue.png" />
+    <Content Include="Resources\setting_tools.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bin\Debug\Icons\PlayBlue.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bin\Debug\Icons\PauseBlue.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="bin\Debug\Icons\StopBlue.png">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="bin\Debug\index.html" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
