@@ -1,6 +1,5 @@
 ﻿Imports System.ComponentModel
 Imports System.Data.OleDb
-Imports System.Net.Http
 Imports System.Threading
 
 Public Class Form1
@@ -70,7 +69,51 @@ Public Class Form1
         ChildrenTextBox.MaxLength = 1
         AddHandler NewToolStripMenuItem.Click, AddressOf clearAllCntrls
         'Populate ComboBox-------------------------
-        With BackgroundWorker1
+        Try
+            Dim SqlStr As String = ("SELECT * FROM MaritalStatus")
+            Dim SqlStr1 As String = ("SELECT COUNT(*) FROM MaritalStatus")
+            Dim Icount As Object
+            Dim Count As Integer
+            Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString(DBPass:=("evry1falls"))},
+            M_Cmd As New OleDbCommand(SqlStr, CN), M1_Cmd As New OleDbCommand(SqlStr1, CN)
+                CN.Open()
+                Icount = M1_Cmd.ExecuteScalar
+                Count = Convert.ToInt32(Icount)
+                Using M_Reader As OleDbDataReader = M_Cmd.ExecuteReader
+                    If M_Reader.HasRows Then
+                        While M_Reader.Read
+                            M_ComboItems.Add(M_Reader!MStatusID, M_Reader!Mname)
+                            'BackgroundWorker1.ReportProgress(Count, "Items")
+                        End While
+                    End If
+                End Using
+            End Using
+            With MaritalComboBox
+                .Items.Clear()
+                .DataSource = Nothing
+                .BeginUpdate()
+                .DataSource = New BindingSource(M_ComboItems, Nothing)
+                .DisplayMember = "Value"
+                .ValueMember = "key"
+                .Sorted = True
+                .SelectedIndex = -1
+                .EndUpdate()
+            End With
+            Label6.Text &= (" - " & M_ComboItems.Count.ToString)
+        Catch ex As OleDbException
+            MsgBox(ex.Message)
+        End Try
+        'With BackgroundWorker1
+        ' .WorkerSupportsCancellation = True
+        ' .WorkerReportsProgress = True
+        ' If .IsBusy Then
+        ' .CancelAsync()
+        ' End If
+        ' .RunWorkerAsync()
+        ' End With
+        '--------------------------------------
+        'Populate DataGridView---------------------
+        With BackgroundWorker2
             .WorkerSupportsCancellation = True
             .WorkerReportsProgress = True
             If .IsBusy Then
@@ -78,13 +121,6 @@ Public Class Form1
             End If
             .RunWorkerAsync()
         End With
-        '--------------------------------------
-        'Populate DataGridView---------------------
-        BackgroundWorker2.WorkerSupportsCancellation = True
-        If BackgroundWorker2.IsBusy Then
-            BackgroundWorker2.CancelAsync()
-        End If
-        BackgroundWorker2.RunWorkerAsync()
         '------------------------------------------
     End Sub
     Private Sub Timer1_Tick(sender As Object, e As EventArgs) Handles Timer1.Tick
@@ -296,66 +332,16 @@ Public Class Form1
             MsgBox("Error Display Image : " & ex.Message)
         End Try
     End Sub
-    Private Sub BackgroundWorker1_DoWork(sender As Object, e As DoWorkEventArgs) Handles BackgroundWorker1.DoWork
-        Try
-            Dim SqlStr As String = ("SELECT * FROM MaritalStatus")
-            Dim SqlStr1 As String = ("SELECT COUNT(*) FROM MaritalStatus")
-            Dim Icount As Object
-            Dim Count As Integer
-            Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()},
-            M_Cmd As New OleDbCommand(SqlStr, CN), M1_Cmd As New OleDbCommand(SqlStr1, CN)
-                CN.Open()
-                Icount = M1_Cmd.ExecuteScalar
-                Count = Convert.ToInt32(Icount)
-                Using M_Reader As OleDbDataReader = M_Cmd.ExecuteReader
-                    If M_Reader.HasRows Then
-                        While M_Reader.Read
-                            M_ComboItems.Add(M_Reader!MStatusID, M_Reader!Mname)
-                            BackgroundWorker1.ReportProgress(Count - 1, "Items")
-                        End While
-                    End If
-                End Using
-            End Using
-        Catch ex As OleDbException
-            MsgBox(ex.Message)
-        End Try
-    End Sub
-    Private Sub BackgroundWorker1_ProgressChanged(sender As Object, e As ProgressChangedEventArgs) Handles BackgroundWorker1.ProgressChanged
-        Debug.WriteLine((String.Format _
-            ("{0} percent completed and {1} has been Loaded",
-             e.ProgressPercentage, e.UserState.ToString)))
-    End Sub
-    Private Sub BackgroundWorker1_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) Handles BackgroundWorker1.RunWorkerCompleted
-        Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()}
-            Try
-                With MaritalComboBox
-                    .Items.Clear()
-                    .DataSource = Nothing
-                    .BeginUpdate()
-                    .DataSource = New BindingSource(M_ComboItems, Nothing)
-                    .DisplayMember = "Value"
-                    .ValueMember = "key"
-                    .Sorted = True
-                    .SelectedIndex = -1
-                    .EndUpdate()
-                End With
-                Label6.Text &= (" - " & M_ComboItems.Count.ToString)
-            Catch ex As OleDbException
-                LblStatus.Text = ("Database Error")
-                Debug.WriteLine(ex.Message)
-            End Try
-        End Using
-    End Sub
     Private Sub BackgroundWorker2_DoWork(sender As Object, e As DoWorkEventArgs) Handles BackgroundWorker2.DoWork
+        Thread.Sleep(500)
         e.Result = BGW_Reslt
         If String.IsNullOrEmpty(e.Result) Then
             e.Result = ("SELECT * FROM BasicInfo LEFT JOIN MaritalStatus ON MaritalStatus.MStatusID = BasicInfo.MStatusID " &
             "ORDER BY BasicInfo.UserID ASC;")
         End If
-        Threading.Thread.Sleep(500)
     End Sub
     Private Sub BackgroundWorker2_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) Handles BackgroundWorker2.RunWorkerCompleted
-        Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString()},
+        Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString(DBPass:=("evry1falls"))},
             M_Cmd As New OleDbCommand(e.Result, CN)
             Try
                 CN.Open()

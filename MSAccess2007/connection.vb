@@ -1,9 +1,10 @@
 ﻿Imports System.Data.OleDb
 Imports System.IO
 Imports System.Configuration
+Imports dao
 Module connection
     Private MyDirectory As String = Application.StartupPath
-    Private DBPass As String = My.Settings.MyPass
+    Public DBPass1 As String
     Function GetDataSource(Optional ThisDB As String = "ThisDB.accdb") As String
         'Valid Path + Microsoft Access Database file + extension
         Dim MyDataSource As String = String.Empty
@@ -51,19 +52,29 @@ Module connection
         Next
         Return Provider
     End Function
-    Function GetBuilderCNString(Optional ThisDB As String = "ThisDB.accdb", Optional DBPass As String = "evry1falls") As String
+    Public Property _DBPassword As String
+        Get
+            Return DBPass1
+        End Get
+        Set(ByVal value As String)
+            DBPass1 = value
+        End Set
+    End Property
+    Function GetBuilderCNString(Optional DBPath As String = ("") _
+                                , Optional DBPass As String = ("")) As String
         Dim ThisConnectionString As String = String.Empty
-        Dim builder As New OleDbConnectionStringBuilder() With {
-        .PersistSecurityInfo = False,
-        .Provider = GetProvider(),
-        .DataSource = GetDataSource(ThisDB)
-        }
+        Dim builder As New OleDbConnectionStringBuilder() With {.PersistSecurityInfo = False}
         Try
             With builder
+                .OleDbServices = -1
+                .Provider = GetProvider()
+                If String.IsNullOrEmpty(DBPath) Then
+                    DBPath = GetDataSource(IO.Path.Combine(Application.StartupPath, "ThisDB.accdb"))
+                End If
+                .DataSource = GetDataSource(DBPath)
                 .Add("Jet OLEDB:Database Password", DBPass)
-                .Add("Jet OLEDB:Database Locking Mode", 1)
             End With
-            ThisConnectionString = (builder.ConnectionString)
+            ThisConnectionString = builder.ConnectionString
         Catch ex As OleDbException
             MsgBox("Database Error : " & ex.Message)
             Return ThisConnectionString
@@ -90,13 +101,46 @@ Module connection
             Engine.CompactDatabase(
                 src,
                 Dest,
-                Microsoft.Office.Interop.Access.Dao.LanguageConstants.dbLangGeneral,
-                Microsoft.Office.Interop.Access.Dao.DatabaseTypeEnum.dbVersion150,
                 ";pwd=" & My.Settings.MyPass)
         Catch ex As Exception
-            Debug.WriteLine("Error Compact : " & ex.Message)
+            MsgBox("Error Compact : " & ex.Message)
         Finally
             Engine = Nothing
         End Try
+    End Sub
+    Public Sub ConnectAsDAO()
+        Dim Attrib As String
+        Dim prpLoop As dao.Property
+        Dim DBEngin As New Microsoft.Office.Interop.Access.Dao.DBEngine
+        Dim wrkMain As Microsoft.Office.Interop.Access.Dao.Workspace = DBEngin.Workspaces(0)
+        Dim dbsPubs As Microsoft.Office.Interop.Access.Dao.Database =
+            wrkMain.OpenDatabase(DatabaseSettings._GetDPath, False, False, ";pwd=" & _DBPassword)
+        Dim tBldef As TableDef
+
+        For I As Integer = 0 To dbsPubs.TableDefs.Count - 1
+            tBldef = dbsPubs.TableDefs(I)
+            Attrib = (tBldef.Attributes And -2147483646)
+            If Attrib = 0 Then
+                For Each prpLoop In tBldef.Properties
+                    Try
+                        Debug.WriteLine("  " & prpLoop.Name & " - " &
+                   IIf(IsNothing(prpLoop), "[empty]", prpLoop.Value))
+                    Catch ex As Exception
+                        Debug.WriteLine(prpLoop.Name)
+                    End Try
+                Next
+                prpLoop = Nothing
+                'Debug.WriteLine(tBldef.Name)
+                Dim fldLoop As Fields = tBldef.Fields
+                For Each fldloop1 As dao.Field In fldLoop
+                    Debug.WriteLine("Table::" & tBldef.Name & "::Field::" & fldloop1.Name)
+                Next
+                fldLoop = Nothing
+            End If
+            'Debug.WriteLine(tBldef.Name & IIf(Attrib, ": System Table", ": Not System" & "Table"))
+        Next
+        dbsPubs = Nothing
+        tBldef = Nothing
+        DBEngin = Nothing
     End Sub
 End Module

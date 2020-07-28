@@ -259,11 +259,6 @@ Partial Class Form1
         '
         Me.Timer1.Interval = 1000
         '
-        'BackgroundWorker1
-        '
-        '
-        'BackgroundWorker2
-        '
         '
         'PersonalPictureBox
         '

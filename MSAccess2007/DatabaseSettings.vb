@@ -7,6 +7,7 @@ Imports Microsoft.Office.Interop.Access.Dao
 Public Class DatabaseSettings
     Private FirstDBFile, SecondDBFile As String
     Private DaoDB As New DBEngine
+    Private Shared DatabaseName, DataBasePath As String
     Public Shared Function GetFileInfo(file As String) As TreeNode
         Dim information = My.Computer.FileSystem.GetFileInfo(file)
         Dim MainTree As New TreeNode
@@ -103,7 +104,7 @@ Public Class DatabaseSettings
         Dim Result As String = String.Empty
         Try
             Using fsSource As FileStream = New FileStream(File,
-            FileMode.Open, FileAccess.Read)
+                FileMode.Open, FileAccess.Read)
                 ' Read the source file into a byte array.
                 Dim bytes() As Byte = New Byte(255) {}
                 Dim numBytesToRead As Integer = 256 'CType(fsSource.Length, Integer)
@@ -143,42 +144,61 @@ Public Class DatabaseSettings
         End With
         Try
             Dim userTables As DataTable = New DataTable("Table")    'TABLES
-            Dim userCols As DataTable = New DataTable("Columns")
-            Dim userPkey As DataTable = New DataTable("Primary_Keys")   'Primary_Keys
             Using Conn As New OleDbConnection With {.ConnectionString = GetBuilderCNString(DBName, DBPass)}
-                Conn.Open()
+                Try
+                    Conn.Open()
+                Catch ex As OleDbException
+                    MsgBox(ex.Message)
+                    Return (New TreeNode("Error"))
+                    Exit Function
+                End Try
                 userTables = Conn.GetOleDbSchemaTable(OleDbSchemaGuid.Tables,
                                                       New String() {Nothing, Nothing, Nothing, "Table"})
-                For I As Integer = 0 To userTables.Rows.Count - 1
-                    TableTree.Nodes.Add(userTables.Rows(I)("TABLE_NAME").ToString)
-                    'Get Related Columns as childnode
-                    userCols = Conn.GetOleDbSchemaTable(OleDbSchemaGuid.Columns,
-                                                        New String() {Nothing, Nothing, TableTree.Nodes(I).Text, Nothing})
-                    userPkey = Conn.GetOleDbSchemaTable(OleDbSchemaGuid.Primary_Keys,
-                                                        New String() {Nothing, Nothing, TableTree.Nodes(I).Text})
-                    For Icol As Integer = 0 To userCols.Rows.Count - 1  'Fields
-                        TableTree.Nodes(I).Nodes.Add(userCols.Rows(Icol)("COLUMN_NAME").ToString())
-                        TableTree.Nodes(I).Nodes(Icol).ToolTipText = ("Data Type : ") &
-                        OleDbTypeToString(CType(Int32.Parse(userCols.Rows(Icol)("DATA_TYPE").ToString), OleDbType)) &
-                        " &Size: " & Integer.Parse(CType(userCols.Rows(Icol)("DATA_TYPE"), String)).ToString()
-                        For Each PKeyRow As DataRow In userPkey.Rows
-                            If PKeyRow(7).ToString.ToLower = "PrimaryKey".ToLower Then
-                                Dim PrimaryKey As Integer = Convert.ToInt32(PKeyRow.Item("COLUMN_NAME"))
-                                Dim Ordinal = CShort(PKeyRow.Item("ORDINAL"))
-                                If TableTree.Nodes(I).Nodes(Icol).Text = PrimaryKey.ToString Then
-                                    TableTree.Nodes(I).Nodes(Icol).NodeFont = New Font("Times New Roman", 9, FontStyle.Underline)
-                                    TableTree.Nodes(I).Nodes(Icol).ForeColor = Color.Blue
-                                    TableTree.Nodes(I).Nodes(Icol).ToolTipText += " - Primary Key"
-                                End If
-                            End If
-                        Next
-                    Next
+                For Each row As DataRow In userTables.Rows
+                    TableTree.Nodes.Add(row.Field(Of String)("Table_Name"))
                 Next
             End Using
         Catch ex As OleDbException
             MsgBox(ex.Message)
         End Try
         Return TableTree
+    End Function
+    Public Shared Function GetOledbSchemaToDataGridView(ByVal DatabaseName As String,
+                                                 ByVal TableName As String,
+                                                 ByVal GridView As DataGridView,
+                                                        Optional DBPass As String = ("evry1falls")) As Boolean
+        Try
+            Using CN As New OleDbConnection With {.ConnectionString = GetBuilderCNString(DatabaseName, DBPass)}
+                Dim Table As New DataTable With {.TableName = String.Format("tbl{0}", TableName)}
+                CN.Open()
+                Table = CN.GetOleDbSchemaTable(OleDbSchemaGuid.Columns, New Object() {Nothing, Nothing, TableName, Nothing})
+                Dim dt As DataTable = Table.DefaultView.ToTable(String.Format("{0}_schema", TableName.ToString), True, New String() _
+                                      {"Column_Name", "Data_Type", "is_nullable", "Character_Maximum_Length", "Description"})
+                ' Fields which may be null are casted as Object even though we could do various forms of checks and conversions 
+                ' this is better as our DataGridView treats items as objects. A good example is the 'Description' field which
+                ' more times than not will not be populated.
+                Dim query =
+                   (
+                      From fd In dt.AsEnumerable
+                      Select New With
+                      {
+                            .Column = fd.Field(Of String)("Column_Name"),
+                            .DataType = GetNameOfType(fd("Data_Type")),
+                            .Size = fd.Field(Of Object)("Character_Maximum_Length"),
+                            .Description = fd.Field(Of Object)("Description"),
+                            .Nullable = fd.Field(Of Boolean)("is_nullable").ToString
+                      }).ToList
+                CN.Close()
+                GridView.DataSource = query
+                For Each dt1 As DataRow In dt.Rows
+                    Debug.WriteLine(String.Join(",", dt1.ItemArray))
+                Next
+                'GridView.AutoFillLastColumn()
+                Return True
+            End Using
+        Catch ex As OleDbException
+            Return False
+        End Try
     End Function
     Public Shared Function GetViews(ByVal DBName As String, Optional DBPass As String = "evry1falls") As TreeNode
         Dim ViewTree As TreeNode = New TreeNode("Views")
@@ -196,17 +216,23 @@ Public Class DatabaseSettings
         End Try
         Return ViewTree
     End Function
-    Public Shared Function GetContents(TableName As String, ByVal DBName As String,
-                                       Optional DBPass As String = "evry1falls") As DataTable
+    Public Shared Function GetContents(TableName As String, Optional DBName As String = "ThisDb.accdb",
+                                          Optional DBPass As String = "evry1falls") As DataTable
         Dim SqlStr As String = ("SELECT * FROM [" & TableName & "]")
         Using MyTable As DataTable = New DataTable
             Try
                 Using Conn As New OleDbConnection With {.ConnectionString = GetBuilderCNString(DBName, DBPass)},
            CMD As New OleDbCommand(SqlStr, Conn)
                     Conn.Open()
-                    Using MyReader As OleDbDataReader = CMD.ExecuteReader
-                        MyTable.Load(MyReader)
-                    End Using
+                    Try
+                        Using MyReader As OleDbDataReader = CMD.ExecuteReader
+                            MyTable.Load(MyReader)
+                        End Using
+                    Catch ex As Exception
+                        MsgBox(ex.Message)
+                    Finally
+                        Conn.Close()
+                    End Try
                 End Using
             Catch ex As OleDbException
                 MsgBox(ex.Message)
@@ -228,6 +254,7 @@ Public Class DatabaseSettings
         End Try
         Return schemaTable
     End Function
+
     ' Map OLEDB data types to their respective string descriptions.
     'https://docs.microsoft.com/en-us/iis/extensions/database-manager-reference/column-length-property-microsoft-web-management-databasemanager
     Friend Shared Function OleDbTypeToString(ByVal type As OleDbType) As String
@@ -262,4 +289,29 @@ Public Class DatabaseSettings
                 Return "Unknown"
         End Select
     End Function
+    Private Shared Function GetNameOfType() As Dictionary(Of Integer, String)
+        Dim names() As String = CType([Enum].GetNames(GetType(OleDbType)), String())
+        Dim Values As Integer() = CType([Enum].GetValues(GetType(OleDbType)), Integer())
+        Dim ThisTypO As New Dictionary(Of Integer, String)
+        For Row As Integer = 0 To names.Count - 1
+            ThisTypO.Add(Values(Row), names(Row))
+        Next
+        Return ThisTypO
+    End Function
+    Public Shared Property _GetDBName As String
+        Get
+            Return DatabaseName
+        End Get
+        Set(value As String)
+            DatabaseName = value
+        End Set
+    End Property
+    Public Shared Property _GetDPath As String
+        Get
+            Return DataBasePath
+        End Get
+        Set(value As String)
+            DataBasePath = value
+        End Set
+    End Property
 End Class

@@ -92,20 +92,21 @@
       <EmbedInteropTypes>False</EmbedInteropTypes>
     </Reference>
     <Reference Include="Dropbox.Api, Version=4.0.0.0, Culture=neutral, PublicKeyToken=310f0e82fbb45d01, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Dropbox.Api.4.10.0\lib\net45\Dropbox.Api.dll</HintPath>
-      <Private>True</Private>
     </Reference>
     <Reference Include="FlashControlV71, Version=1.0.3187.32366, Culture=neutral, PublicKeyToken=692fbea5521e1304" />
-    <Reference Include="Microsoft.Office.interop.access.dao, Version=15.0.0.0, Culture=neutral, PublicKeyToken=71e9bce111e9429c, processorArchitecture=MSIL">
-      <EmbedInteropTypes>True</EmbedInteropTypes>
-    </Reference>
     <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <HintPath>..\packages\Newtonsoft.Json.7.0.1\lib\net45\Newtonsoft.Json.dll</HintPath>
       <Private>True</Private>
     </Reference>
     <Reference Include="System" />
+    <Reference Include="System.ComponentModel.DataAnnotations" />
     <Reference Include="System.Configuration" />
-    <Reference Include="System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL" />
+    <Reference Include="System.Data, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Data.Linq" />
     <Reference Include="System.Deployment" />
     <Reference Include="System.Drawing" />
     <Reference Include="System.Net.Http" />
@@ -131,6 +132,7 @@
     <Import Include="System.Threading.Tasks" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AppConfig.vb" />
     <Compile Include="bin\Debug\MyInfo.vb">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -152,6 +154,12 @@
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="Drobbox.vb" />
+    <Compile Include="ExtendedProp.Designer.vb">
+      <DependentUpon>ExtendedProp.vb</DependentUpon>
+    </Compile>
+    <Compile Include="ExtendedProp.vb">
+      <SubType>Form</SubType>
+    </Compile>
     <Compile Include="Form1.vb">
       <SubType>Form</SubType>
     </Compile>
@@ -159,6 +167,7 @@
       <DependentUpon>Form1.vb</DependentUpon>
       <SubType>Form</SubType>
     </Compile>
+    <Compile Include="GenerateSQL.vb" />
     <Compile Include="My Project\AssemblyInfo.vb" />
     <Compile Include="My Project\Application.Designer.vb">
       <AutoGen>True</AutoGen>
@@ -186,9 +195,13 @@
     <EmbeddedResource Include="DBSettings.resx">
       <DependentUpon>DBSettings.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="ExtendedProp.resx">
+      <DependentUpon>ExtendedProp.vb</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Form1.resx">
       <DependentUpon>Form1.vb</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="My Project\licenses.licx" />
     <EmbeddedResource Include="My Project\Resources.resx">
       <Generator>VbMyResourcesResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.vb</LastGenOutput>
@@ -211,60 +224,41 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\Office_Access_2007_Icon.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\Office_Access_2007_Icon.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\Office_Access_2007_Icon_64.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\Office_Access_2007_Icon_64.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder new.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder new.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder_add.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder_add.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder search.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder search.ico" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder_edit.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder_edit.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder_delete.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder_delete.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder_wrench.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder_wrench.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\folder_picture.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\folder_picture.png" />
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\close-2.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\close-2.ico" />
   </ItemGroup>
   <ItemGroup>
     <None Include="MyConn.config">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Include="packages.config" />
+    <Content Include="bin\Debug\Icons\Primary_Key.png" />
     <Content Include="Resources\Dropbox175x175.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
@@ -275,9 +269,7 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="bin\Debug\Icons\no-photo.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\no-photo.png" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{C0C07587-41A7-46C8-8FBD-3F9C8EBE2DDC}" />
@@ -286,16 +278,30 @@
     <Content Include="Resources\setting_tools.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="bin\Debug\Icons\PlayBlue.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bin\Debug\Icons\PauseBlue.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="bin\Debug\Icons\StopBlue.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Content Include="bin\Debug\Icons\PlayBlue.png" />
+    <Content Include="bin\Debug\Icons\PauseBlue.png" />
+    <Content Include="bin\Debug\Icons\StopBlue.png" />
     <Content Include="bin\Debug\index.html" />
+  </ItemGroup>
+  <ItemGroup>
+    <COMReference Include="DAO">
+      <Guid>{00025E01-0000-0000-C000-000000000046}</Guid>
+      <VersionMajor>5</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>primary</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
+    <COMReference Include="Microsoft.Office.Interop.Access.Dao1">
+      <Guid>{4AC9E1DA-5BAD-4AC7-86E3-24F4CDCECA28}</Guid>
+      <VersionMajor>12</VersionMajor>
+      <VersionMinor>0</VersionMinor>
+      <Lcid>0</Lcid>
+      <WrapperTool>tlbimp</WrapperTool>
+      <Isolated>False</Isolated>
+      <EmbedInteropTypes>True</EmbedInteropTypes>
+    </COMReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.VisualBasic.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,8 +1,8 @@
 ﻿Imports System.ComponentModel
 Public Class DBSettings
-    Dim StrOutPuts As String = String.Empty
-    Dim StrSignature As String = String.Empty
-    Dim Pass As String = String.Empty
+    Private StrOutPuts As String = String.Empty
+    Private StrSignature As String = String.Empty
+    Dim dbname As String = String.Empty
     Private Sub DBSettings_FormClosed(sender As Object, e As FormClosedEventArgs) Handles Me.FormClosed
         Form1.Show()
     End Sub
@@ -10,6 +10,7 @@ Public Class DBSettings
         If e.KeyChar = ChrW(Keys.Escape) Then Close()
     End Sub
     Private Sub DBSettings_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        LocationTxt.Text = DatabaseSettings._GetDPath
         Try
             AccssInstledTxt.Text = String.Join(",", DatabaseSettings.AccessInstalleds)
             DBENGTxt.Text = String.Join(vbCrLf, DatabaseSettings.GetMSProvider)
@@ -18,7 +19,6 @@ Public Class DBSettings
         End Try
     End Sub
     Private Sub lblBrowse_Click(sender As Object, e As EventArgs) Handles lblBrowse.Click
-        Dim dbname As String = String.Empty
         Try
             Using OFD As New OpenFileDialog
                 With OFD
@@ -31,8 +31,6 @@ Public Class DBSettings
                     If .ShowDialog = DialogResult.OK Then
                         LocationTxt.Text = OFD.FileName
                         dbname = OFD.SafeFileName
-                        Pass = InputBox("Enter Database Password.")
-                        If String.IsNullOrEmpty(Pass) Then Pass = My.Settings.MyPass
                         If BackgroundWorker1.IsBusy Then
                             BackgroundWorker1.CancelAsync()
                         End If
@@ -56,24 +54,20 @@ Public Class DBSettings
             End If
         Next
         FileSignText.Text = StrSignature.Remove(15)
-
+        DatabaseSettings._GetDBName = dbname
+        DatabaseSettings._GetDPath = LocationTxt.Text
     End Sub
     Private Sub BackgroundWorker1_DoWork(sender As Object, e As System.ComponentModel.DoWorkEventArgs) Handles BackgroundWorker1.DoWork
         Threading.Thread.Sleep(500)
     End Sub
     Private Sub BackgroundWorker1_RunWorkerCompleted(sender As Object, e As RunWorkerCompletedEventArgs) Handles BackgroundWorker1.RunWorkerCompleted
+        DBPass1 = InputBox("Enter Database Password")
+        AppConfig.AddUpdateAppSettings("ThisPassword", DBPass1)
         With TreeView1
             .Nodes.Clear()
             .BeginUpdate()
             .Nodes.Add(DatabaseSettings.GetFileInfo(LocationTxt.Text))
             .ExpandAll()
-            .EndUpdate()
-        End With
-        With TreeView2
-            .Nodes.Clear()
-            .BeginUpdate()
-            .Nodes.Add(DatabaseSettings.GetTables(LocationTxt.Text, Pass))
-            .Nodes.Add(DatabaseSettings.GetViews(LocationTxt.Text, Pass))
             .EndUpdate()
         End With
     End Sub
@@ -89,37 +83,9 @@ Public Class DBSettings
             MsgBox(ex.Message)
         End Try
     End Sub
-    Private Sub TreeView2_AfterSelect(sender As Object, e As TreeViewEventArgs) Handles TreeView2.AfterSelect
-        If IsNothing(e.Node.Parent) Then Exit Sub
-        If e.Node.Parent.Text = ("Tables") Then
-            Dim ThisTable As String = e.Node.Text
-            With DataGridView1
-                .AllowUserToAddRows = False
-                With .ColumnHeadersDefaultCellStyle
-                    .Alignment = DataGridViewContentAlignment.MiddleCenter
-                    .BackColor = Color.LightGray
-                    .ForeColor = Color.DarkBlue
-                End With
-                .EnableHeadersVisualStyles = False
-                .DataSource = DatabaseSettings.GetContents(ThisTable, LocationTxt.Text)
-            End With
-        Else
-            Exit Sub
-        End If
-    End Sub
-    Private Sub DataGridView1_CellFormatting(sender As Object, e As DataGridViewCellFormattingEventArgs) Handles DataGridView1.CellFormatting
-        If e.RowIndex = -1 Or e.ColumnIndex = -1 Then Exit Sub
-        Try
-            If Not IsNothing(e.Value) Then
-                For Each Icolumn As DataGridViewColumn In DataGridView1.Columns
-                    If TypeOf Icolumn Is DataGridViewImageColumn Then
-                        Dim imageColumn = DirectCast(Icolumn, DataGridViewImageColumn)
-                        imageColumn.ImageLayout = DataGridViewImageCellLayout.Zoom
-                    End If
-                Next
-            End If
-        Catch ex As Exception
-            MsgBox(ex.Message)
-        End Try
+    Private Sub Label8_Click_1(sender As Object, e As EventArgs) Handles Label8.Click
+        Dim sQLfRM As New ExtendedProp
+        sQLfRM.Show()
+        Hide()
     End Sub
 End Class

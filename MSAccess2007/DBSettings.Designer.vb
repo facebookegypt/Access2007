@@ -30,8 +30,6 @@ Partial Class DBSettings
         Me.lblBrowse = New System.Windows.Forms.Label()
         Me.Label1 = New System.Windows.Forms.Label()
         Me.TreeView1 = New System.Windows.Forms.TreeView()
-        Me.TreeView2 = New System.Windows.Forms.TreeView()
-        Me.Label2 = New System.Windows.Forms.Label()
         Me.DBENGTxt = New System.Windows.Forms.TextBox()
         Me.Label4 = New System.Windows.Forms.Label()
         Me.AccssInstledTxt = New System.Windows.Forms.TextBox()
@@ -39,8 +37,7 @@ Partial Class DBSettings
         Me.FileSignText = New System.Windows.Forms.TextBox()
         Me.Label6 = New System.Windows.Forms.Label()
         Me.Label7 = New System.Windows.Forms.Label()
-        Me.DataGridView1 = New System.Windows.Forms.DataGridView()
-        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).BeginInit()
+        Me.Label8 = New System.Windows.Forms.Label()
         Me.SuspendLayout()
         '
         'Label3
@@ -59,7 +56,7 @@ Partial Class DBSettings
         Me.ToolStrip1.Location = New System.Drawing.Point(0, 429)
         Me.ToolStrip1.Name = "ToolStrip1"
         Me.ToolStrip1.RenderMode = System.Windows.Forms.ToolStripRenderMode.System
-        Me.ToolStrip1.Size = New System.Drawing.Size(717, 25)
+        Me.ToolStrip1.Size = New System.Drawing.Size(592, 25)
         Me.ToolStrip1.TabIndex = 18
         Me.ToolStrip1.Text = "ToolStrip1"
         '
@@ -71,7 +68,7 @@ Partial Class DBSettings
         Me.LocationTxt.Location = New System.Drawing.Point(15, 25)
         Me.LocationTxt.Name = "LocationTxt"
         Me.LocationTxt.ReadOnly = True
-        Me.LocationTxt.Size = New System.Drawing.Size(627, 20)
+        Me.LocationTxt.Size = New System.Drawing.Size(510, 20)
         Me.LocationTxt.TabIndex = 19
         '
         'lblBrowse
@@ -80,7 +77,7 @@ Partial Class DBSettings
         Me.lblBrowse.BackColor = System.Drawing.Color.Transparent
         Me.lblBrowse.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
         Me.lblBrowse.FlatStyle = System.Windows.Forms.FlatStyle.Flat
-        Me.lblBrowse.Location = New System.Drawing.Point(648, 28)
+        Me.lblBrowse.Location = New System.Drawing.Point(531, 28)
         Me.lblBrowse.Name = "lblBrowse"
         Me.lblBrowse.Size = New System.Drawing.Size(44, 15)
         Me.lblBrowse.TabIndex = 20
@@ -99,25 +96,8 @@ Partial Class DBSettings
         '
         Me.TreeView1.Location = New System.Drawing.Point(12, 209)
         Me.TreeView1.Name = "TreeView1"
-        Me.TreeView1.Size = New System.Drawing.Size(298, 64)
+        Me.TreeView1.Size = New System.Drawing.Size(563, 233)
         Me.TreeView1.TabIndex = 23
-        '
-        'TreeView2
-        '
-        Me.TreeView2.Location = New System.Drawing.Point(321, 64)
-        Me.TreeView2.Name = "TreeView2"
-        Me.TreeView2.ShowNodeToolTips = True
-        Me.TreeView2.Size = New System.Drawing.Size(204, 209)
-        Me.TreeView2.TabIndex = 24
-        '
-        'Label2
-        '
-        Me.Label2.AutoSize = True
-        Me.Label2.Location = New System.Drawing.Point(318, 48)
-        Me.Label2.Name = "Label2"
-        Me.Label2.Size = New System.Drawing.Size(51, 13)
-        Me.Label2.TabIndex = 25
-        Me.Label2.Text = "Contents"
         '
         'DBENGTxt
         '
@@ -159,18 +139,18 @@ Partial Class DBSettings
         '
         'FileSignText
         '
-        Me.FileSignText.Location = New System.Drawing.Point(531, 64)
+        Me.FileSignText.Location = New System.Drawing.Point(316, 64)
         Me.FileSignText.Multiline = True
         Me.FileSignText.Name = "FileSignText"
         Me.FileSignText.ReadOnly = True
         Me.FileSignText.ScrollBars = System.Windows.Forms.ScrollBars.Both
-        Me.FileSignText.Size = New System.Drawing.Size(161, 44)
+        Me.FileSignText.Size = New System.Drawing.Size(174, 44)
         Me.FileSignText.TabIndex = 31
         '
         'Label6
         '
         Me.Label6.AutoSize = True
-        Me.Label6.Location = New System.Drawing.Point(528, 48)
+        Me.Label6.Location = New System.Drawing.Point(313, 48)
         Me.Label6.Name = "Label6"
         Me.Label6.Size = New System.Drawing.Size(68, 13)
         Me.Label6.TabIndex = 30
@@ -181,28 +161,29 @@ Partial Class DBSettings
         Me.Label7.AutoSize = True
         Me.Label7.BackColor = System.Drawing.Color.Transparent
         Me.Label7.ForeColor = System.Drawing.Color.DarkRed
-        Me.Label7.Location = New System.Drawing.Point(534, 111)
+        Me.Label7.Location = New System.Drawing.Point(316, 112)
         Me.Label7.Name = "Label7"
         Me.Label7.Size = New System.Drawing.Size(0, 13)
         Me.Label7.TabIndex = 32
         '
-        'DataGridView1
+        'Label8
         '
-        Me.DataGridView1.Anchor = CType((((System.Windows.Forms.AnchorStyles.Top Or System.Windows.Forms.AnchorStyles.Bottom) _
-            Or System.Windows.Forms.AnchorStyles.Left) _
-            Or System.Windows.Forms.AnchorStyles.Right), System.Windows.Forms.AnchorStyles)
-        Me.DataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize
-        Me.DataGridView1.Location = New System.Drawing.Point(12, 276)
-        Me.DataGridView1.Name = "DataGridView1"
-        Me.DataGridView1.Size = New System.Drawing.Size(693, 166)
-        Me.DataGridView1.TabIndex = 33
+        Me.Label8.AutoSize = True
+        Me.Label8.BackColor = System.Drawing.Color.Transparent
+        Me.Label8.BorderStyle = System.Windows.Forms.BorderStyle.FixedSingle
+        Me.Label8.FlatStyle = System.Windows.Forms.FlatStyle.Flat
+        Me.Label8.Location = New System.Drawing.Point(499, 191)
+        Me.Label8.Name = "Label8"
+        Me.Label8.Size = New System.Drawing.Size(76, 15)
+        Me.Label8.TabIndex = 33
+        Me.Label8.Text = "Generate SQL"
         '
         'DBSettings
         '
         Me.AutoScaleDimensions = New System.Drawing.SizeF(6.0!, 13.0!)
         Me.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font
-        Me.ClientSize = New System.Drawing.Size(717, 454)
-        Me.Controls.Add(Me.DataGridView1)
+        Me.ClientSize = New System.Drawing.Size(592, 454)
+        Me.Controls.Add(Me.Label8)
         Me.Controls.Add(Me.Label7)
         Me.Controls.Add(Me.FileSignText)
         Me.Controls.Add(Me.Label6)
@@ -210,8 +191,6 @@ Partial Class DBSettings
         Me.Controls.Add(Me.Label5)
         Me.Controls.Add(Me.DBENGTxt)
         Me.Controls.Add(Me.Label4)
-        Me.Controls.Add(Me.Label2)
-        Me.Controls.Add(Me.TreeView2)
         Me.Controls.Add(Me.TreeView1)
         Me.Controls.Add(Me.Label1)
         Me.Controls.Add(Me.lblBrowse)
@@ -222,7 +201,6 @@ Partial Class DBSettings
         Me.KeyPreview = True
         Me.Name = "DBSettings"
         Me.Text = "Database Settings"
-        CType(Me.DataGridView1, System.ComponentModel.ISupportInitialize).EndInit()
         Me.ResumeLayout(False)
         Me.PerformLayout()
 
@@ -235,8 +213,6 @@ Partial Class DBSettings
     Friend WithEvents lblBrowse As Label
     Friend WithEvents Label1 As Label
     Friend WithEvents TreeView1 As TreeView
-    Friend WithEvents TreeView2 As TreeView
-    Friend WithEvents Label2 As Label
     Friend WithEvents DBENGTxt As TextBox
     Friend WithEvents Label4 As Label
     Friend WithEvents AccssInstledTxt As TextBox
@@ -244,5 +220,5 @@ Partial Class DBSettings
     Friend WithEvents FileSignText As TextBox
     Friend WithEvents Label6 As Label
     Friend WithEvents Label7 As Label
-    Friend WithEvents DataGridView1 As DataGridView
+    Friend WithEvents Label8 As Label
 End Class
